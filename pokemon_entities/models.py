@@ -18,5 +18,3 @@ class PokemonEntity(models.Model):
     strength = models.CharField(max_length=2, verbose_name='Сила', default='5')
     defence = models.CharField(max_length=2, verbose_name='Защита', default='5')
     stamina = models.CharField(max_length=2, verbose_name='Выносливость', default='5')
-    # def __str__(self):
-    #     return self.pokemon
