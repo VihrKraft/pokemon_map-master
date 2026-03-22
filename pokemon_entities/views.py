@@ -61,6 +61,33 @@ def show_pokemon(request, pokemon_id):
     pokemon = Pokemon.objects.get(id=pokemon_id)
     pokemon_entities = PokemonEntity.objects.filter(pokemon=pokemon)
 
+    pokemon_on_page = {
+        "pokemon_id": pokemon.id,
+        "title_ru": pokemon.title,
+        "title_en": pokemon.title_en,
+        "title_jp": pokemon.title_jp,
+        "description": pokemon.description,
+        "img_url": request.build_absolute_uri(pokemon.image.url),
+    }
+    
+    prev_evolution = pokemon.evolution_from
+
+    if prev_evolution:
+        pokemon_on_page['previous_evolution'] = {
+            "title_ru": prev_evolution.title,
+            "pokemon_id": prev_evolution.id,
+            "img_url": request.build_absolute_uri(prev_evolution.image.url),
+        }
+
+    next_evolution = pokemon.evolution_to.first()
+    
+    if next_evolution:
+        pokemon_on_page['next_evolution'] = {
+            "title_ru": next_evolution.title,
+            "pokemon_id": next_evolution.id,
+            "img_url": request.build_absolute_uri(next_evolution.image.url)
+        }
+
     folium_map = folium.Map(location=MOSCOW_CENTER, zoom_start=12)
     for pokemon_entity in pokemon_entities:
         pokemon_image = request.build_absolute_uri(f'../../media/{pokemon.image}')
@@ -70,29 +97,6 @@ def show_pokemon(request, pokemon_id):
             pokemon_entity.lon,
             pokemon_image
         )
-    
-    evolution = pokemon.evolution_from
-    
-    if evolution:
-        previous_evolution_image = request.build_absolute_uri(f'../../media/{pokemon.evolution_from.image}')
-        previous_evolution = {
-            "title_ru": pokemon.evolution_from.title,
-            "pokemon_id": pokemon.evolution_from.id,
-            "img_url": previous_evolution_image,
-        }
-    else:
-        previous_evolution = None
-
-    pokemon_on_page = {
-        "pokemon_id": pokemon.id,
-        "title_ru": pokemon.title,
-        "title_en": pokemon.title_en,
-        "title_jp": pokemon.title_jp,
-        "description": pokemon.description,
-        "img_url": pokemon_image,
-        "previous_evolution": previous_evolution,
-    }
-
 
     return render(request, 'pokemon.html', context={
         'map': folium_map._repr_html_(), 'pokemon': pokemon,
